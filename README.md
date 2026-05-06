@@ -1,6 +1,6 @@
 ### Fluxul de lucru pe scurt (The "Safe" Way)
 
-'git checkout <numele_branchului>' obliga git-ul sa schimbe locatia branchului
+'git checkout <numele_branchului>' obliga git-ul sa schimbe locatia branchului actual, daca esti in main si dai checkout <alt_branch>, te va muta la <alt_branch> si vice versa
 
 1. **START:** `git checkout main` apoi `git pull` (ia ce e nou).
 2. **LUCRU:** `git checkout -b <numele_branchului>` (creaza un branch nou cu numele dat).
