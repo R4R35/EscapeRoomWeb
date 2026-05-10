@@ -1,65 +1,147 @@
-import Image from "next/image";
+'use client'
+import React, { useState, useEffect } from 'react'
+import Cafeteria from './components/cafeteria'
+import DigitalKeypad from './components/digitalKeypad'
 
-export default function Home() {
-  return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+const rooms = ['cafeteria_1', 'cafeteria_2'] as const;
+
+const MainPage = () => {
+  const [cameraIndex, setCameraIndex] = useState(0);
+  const [gameMessage, setGameMessage] = useState("");
+  const [activeZoom, setActiveZoom] = useState<string | null>(null);
+  const [zoomImage, setZoomImage] = useState<string>("");
+
+  const currentRoom = rooms[cameraIndex];
+
+  // message
+  useEffect(() => {
+    if (!gameMessage) return;
+    const timer = setTimeout(() => setGameMessage(""), 3000);
+    return () => clearTimeout(timer);
+  }, [gameMessage]);
+
+  const handleAction = (text: string) => setGameMessage(text);
+
+  const handleZoom = (zoomId: string, zoomImageUrl?: string) => {
+    setActiveZoom(zoomId);
+    if (zoomImageUrl) {
+      setZoomImage(zoomImageUrl);
+    }
+  };
+
+  const navigate = (direction: 'prev' | 'next') => {
+    setCameraIndex(prev => {
+      if (direction === 'prev') {
+        return prev > 0 ? prev - 1 : rooms.length - 1;
+      }
+      return prev < rooms.length - 1 ? prev + 1 : 0;
+    });
+  };
+
+  // zoom in/out 
+  const renderRoom = () => {
+    // digital keypad zoom
+    if (activeZoom === "digital_keypad") {
+      return (
+        <DigitalKeypad 
+          onBack={() => setActiveZoom(null)} 
+          onAction={handleAction} 
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+      );
+    }
+
+    // zoom for objects 
+    if (activeZoom && zoomImage) {
+      return (
+        <div className="relative w-full h-full animate-in zoom-in-95 duration-300">
+          <img 
+            src={zoomImage} 
+            className="w-full h-full object-contain bg-[#C2C5AA]" 
+            alt={`Zoom view - ${activeZoom}`} 
+          />
+          <button 
+            onClick={() => {
+              setActiveZoom(null);
+              setZoomImage(""); 
+            }}
+            className="absolute top-4 right-4 bg-black/50 text-white p-2 rounded-full 
+                       hover:bg-white hover:text-black transition-all z-20"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+            BACK
+          </button>
         </div>
-      </main>
-    </div>
+      );
+    }
+
+    // normal
+    return (
+      <Cafeteria 
+        roomVariant={currentRoom} 
+        onAction={handleAction} 
+        onZoom={handleZoom} 
+      />
+    );
+  };
+
+  return (
+    <main className="flex flex-col pt-[2%] pb-[1%] items-center justify-center gap-2 
+                    w-screen h-screen bg-black">
+      <div className='relative items-center'>
+        <h1 className="text-white text-2xl font-bold">Cafeteria</h1>
+      </div>
+      
+      {/* rooms container */}
+      <div className="relative w-[95vw] max-w-[1100px] aspect-video
+                border border-gray-800 bg-[#0d1117] rounded-xl overflow-hidden shadow-2xl">
+        
+        {/* message */}
+        {gameMessage && (
+          <div className="absolute bottom-[10%] left-1/2 -translate-x-1/2 z-[100] w-full 
+                          bg-black/70 border border-gray-600 p-4 text-center 
+                          animate-in fade-in">
+            <p className="text-lg md:text-xl font-medium tracking-wide">
+              {gameMessage}
+            </p>
+          </div>
+        )}
+
+        {/* draw camera */}
+        {renderRoom()}
+
+        {/* navigation */}
+        {!activeZoom && (
+          <>
+            <button 
+              onClick={() => navigate('prev')}
+              className="absolute left-4 top-1/2 -translate-y-1/2 z-50 p-2 
+                         text-white/50 hover:text-white transition-all"
+            >
+              {"<"}
+            </button>
+            <button 
+              onClick={() => navigate('next')}
+              className="absolute right-4 top-1/2 -translate-y-1/2 z-10 p-2 
+                         text-white/50 hover:text-white transition-all"
+            >
+              {">"}
+            </button>
+          </>
+        )}
+      </div>
+
+      {/* Inventar */}
+      <div className="flex items-center p-3 gap-4 w-fit max-w-[90%] h-[12%] 
+                      bg-gray-900/50 border border-gray-800 rounded-2xl overflow-x-auto">
+        {Array.from({ length: 8 }, (_, i) => (
+          <div 
+            key={i} 
+            className="aspect-square h-full flex-shrink-0 bg-gray-800/80 rounded-xl 
+                       border border-gray-700 hover:border-blue-500 transition-all cursor-pointer"
+          />
+        ))}
+      </div>
+    </main>
   );
-}
+};
+
+export default MainPage;
