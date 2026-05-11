@@ -4,11 +4,11 @@ import Cafeteria from './components/cafeteria'
 import DigitalKeypad from './components/digitalKeypad'
 import Hallway from './components/hallway'
 import Lab from './components/lab'
+import Closet from './components/closet'
 import { inventory, addToInventory } from './gameState'
+import { RoomConfigs, Scene } from './types'
 
 const rooms = ['cafeteria_1', 'cafeteria_2'] as const;
-
-type Scene = 'cafeteria' | 'hallway' | 'lab';
 
 const MainPage = () => {
   const [cameraIndex, setCameraIndex] = useState(0);
@@ -19,6 +19,7 @@ const MainPage = () => {
   const [sceneKey, setSceneKey] = useState(0);
   const [inventoryItems, setInventoryItems] = useState<(string | null)[]>(() => [...inventory]);
   const [selectedSlot, setSelectedSlot] = useState<number | null>(null);
+ const [unlockedDoors, setUnlockedDoors] = useState<string[]>([]);
 
   const currentRoom = rooms[cameraIndex];
 
@@ -32,6 +33,13 @@ const MainPage = () => {
   const handleAction = (text: string) => setGameMessage(text);
 
   const handlePickup = (item: string) => {
+
+    const isAlreadyInInventory = inventoryItems.some(slot => slot === item);
+
+    if (isAlreadyInInventory) {
+      handleAction("I already have this item in my bag.");
+      return; 
+    }
     addToInventory(item);
     setInventoryItems([...inventory]);
   };
@@ -50,6 +58,14 @@ const MainPage = () => {
       setInventoryItems(next);
       setSelectedSlot(null);
     }
+  };
+
+  const handleUseItem = (slotIndex: number) => {
+  const next = [...inventoryItems];
+  next[slotIndex] = null;
+  setInventoryItems(next);
+  inventory[slotIndex] = null; 
+  setSelectedSlot(null);
   };
 
   const handleZoom = (zoomId: string, zoomImageUrl?: string) => {
@@ -96,12 +112,24 @@ const MainPage = () => {
       );
     }
 
+    //closet scene
+    if (currentScene === 'closet') {
+      return (
+        <Closet
+          onNavigate={navigateToScene}
+          onAction={handleAction}
+          onPickup={handlePickup}
+        />
+      );
+    }
+
     // digital keypad zoom
     if (activeZoom === "digital_keypad") {
       return (
         <DigitalKeypad
           onBack={() => setActiveZoom(null)}
           onAction={handleAction}
+          onPickup={handlePickup}
         />
       );
     }
@@ -129,22 +157,37 @@ const MainPage = () => {
       );
     }
 
-    // normal cafeteria view
     return (
       <Cafeteria
+        unlockedDoors={unlockedDoors}
+        onUnlock={(doorId) => {
+          setUnlockedDoors(prev => [...prev, doorId]);
+          if (selectedSlot !== null) handleUseItem(selectedSlot);
+        }}
         roomVariant={currentRoom}
         onAction={handleAction}
         onZoom={handleZoom}
         onNavigate={navigateToScene}
+        inventoryItems={inventoryItems}
+        selectedSlot={selectedSlot}
       />
     );
+  };
+
+  const sceneTitles: Record<string, string> = {
+  cafeteria: "Cafeteria",
+  hallway: "Hallway",
+  lab: "Science Laboratory",
+  closet: "Storage Closet"
   };
 
   return (
     <main className="flex flex-col pt-[2%] pb-[1%] items-center justify-center gap-2 
                     w-screen h-screen bg-black">
       <div className='relative items-center'>
-        <h1 className="text-white text-2xl font-bold">Cafeteria</h1>
+        <h1 className="text-white text-2xl font-bold tracking-widest">
+        {sceneTitles[currentScene]}
+      </h1>
       </div>
       
       {/* rooms container */}
@@ -162,12 +205,12 @@ const MainPage = () => {
           </div>
         )}
 
-        {/* draw camera */}
+        {/* draw room */}
         <div key={sceneKey} className="w-full h-full animate-scene-enter">
           {renderRoom()}
         </div>
 
-        {/* navigation */}
+        {/* navigation */ }
         {!activeZoom && currentScene === 'cafeteria' && (
           <>
             <button 

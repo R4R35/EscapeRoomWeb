@@ -2,13 +2,12 @@
 import React, { useState } from 'react'
 import { DigitalKeypadProps } from '../types'
 
-const CORRECT_CODE_HALLWAY = "1405";
-const CORRECT_CODE_CLOSET = "0000";
+const CORRECT_CODE_CLOSET = "1405";
 const BUTTONS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "DEL", "0", "OK"] as const;
 
 type Button = typeof BUTTONS[number];
 
-const DigitalKeypad: React.FC<DigitalKeypadProps> = ({ onBack, onAction }) => {
+const DigitalKeypad: React.FC<DigitalKeypadProps> = ({ onBack, onAction, onPickup }) => {
   const [code, setCode] = useState("");
 
   const handlePress = (num: string) => {
@@ -21,15 +20,14 @@ const DigitalKeypad: React.FC<DigitalKeypadProps> = ({ onBack, onAction }) => {
   const handleClear = () => setCode("");
 
   const handleOk = () => {
-    if (code === CORRECT_CODE_HALLWAY) {
-      onAction("Access granted. You got the key to the hallway door!");
-    } else if (code === CORRECT_CODE_CLOSET) {
-      onAction("Access granted. You got the key to the closet!");
-    } else {
-      onAction("Wrong code!");
-      handleClear();
-    }
-  };
+  if (code === CORRECT_CODE_CLOSET) {
+    onAction("You got the key to the closet!");
+    onPickup("Cafeteria/closet_key.png"); 
+  } else {
+    onAction("Wrong code!");
+    handleClear();
+  }
+};
 
   const handleButtonClick = (btn: Button) => {
     switch (btn) {
