@@ -2,14 +2,23 @@
 import React, { useState, useEffect } from 'react'
 import Cafeteria from './components/cafeteria'
 import DigitalKeypad from './components/digitalKeypad'
+import Hallway from './components/hallway'
+import Lab from './components/lab'
+import { inventory, addToInventory } from './gameState'
 
 const rooms = ['cafeteria_1', 'cafeteria_2'] as const;
+
+type Scene = 'cafeteria' | 'hallway' | 'lab';
 
 const MainPage = () => {
   const [cameraIndex, setCameraIndex] = useState(0);
   const [gameMessage, setGameMessage] = useState("");
   const [activeZoom, setActiveZoom] = useState<string | null>(null);
   const [zoomImage, setZoomImage] = useState<string>("");
+  const [currentScene, setCurrentScene] = useState<Scene>('cafeteria');
+  const [sceneKey, setSceneKey] = useState(0);
+  const [inventoryItems, setInventoryItems] = useState<(string | null)[]>(() => [...inventory]);
+  const [selectedSlot, setSelectedSlot] = useState<number | null>(null);
 
   const currentRoom = rooms[cameraIndex];
 
@@ -22,11 +31,37 @@ const MainPage = () => {
 
   const handleAction = (text: string) => setGameMessage(text);
 
+  const handlePickup = (item: string) => {
+    addToInventory(item);
+    setInventoryItems([...inventory]);
+  };
+
+  const handleSlotClick = (i: number) => {
+    if (selectedSlot === null) {
+      if (inventoryItems[i]) setSelectedSlot(i);
+    } else if (selectedSlot === i) {
+      setSelectedSlot(null);
+    } else {
+      // swap the two slots
+      const next = [...inventoryItems];
+      [next[selectedSlot], next[i]] = [next[i], next[selectedSlot]];
+      inventory[selectedSlot] = next[selectedSlot];
+      inventory[i] = next[i];
+      setInventoryItems(next);
+      setSelectedSlot(null);
+    }
+  };
+
   const handleZoom = (zoomId: string, zoomImageUrl?: string) => {
     setActiveZoom(zoomId);
     if (zoomImageUrl) {
       setZoomImage(zoomImageUrl);
     }
+  };
+
+  const navigateToScene = (destination: string) => {
+    setCurrentScene(destination as Scene);
+    setSceneKey(k => k + 1);
   };
 
   const navigate = (direction: 'prev' | 'next') => {
@@ -38,33 +73,54 @@ const MainPage = () => {
     });
   };
 
-  // zoom in/out 
+  // zoom in/out
   const renderRoom = () => {
-    // digital keypad zoom
-    if (activeZoom === "digital_keypad") {
+    // hallway scene
+    if (currentScene === 'hallway') {
       return (
-        <DigitalKeypad 
-          onBack={() => setActiveZoom(null)} 
-          onAction={handleAction} 
+        <Hallway
+          onNavigate={navigateToScene}
+          onAction={handleAction}
         />
       );
     }
 
-    // zoom for objects 
+    // lab scene
+    if (currentScene === 'lab') {
+      return (
+        <Lab
+          onNavigate={navigateToScene}
+          onAction={handleAction}
+          onPickup={handlePickup}
+        />
+      );
+    }
+
+    // digital keypad zoom
+    if (activeZoom === "digital_keypad") {
+      return (
+        <DigitalKeypad
+          onBack={() => setActiveZoom(null)}
+          onAction={handleAction}
+        />
+      );
+    }
+
+    // zoom for objects
     if (activeZoom && zoomImage) {
       return (
         <div className="relative w-full h-full animate-in zoom-in-95 duration-300">
-          <img 
-            src={zoomImage} 
-            className="w-full h-full object-contain bg-[#C2C5AA]" 
-            alt={`Zoom view - ${activeZoom}`} 
+          <img
+            src={zoomImage}
+            className="w-full h-full object-contain bg-[#C2C5AA]"
+            alt={`Zoom view - ${activeZoom}`}
           />
-          <button 
+          <button
             onClick={() => {
               setActiveZoom(null);
-              setZoomImage(""); 
+              setZoomImage("");
             }}
-            className="absolute top-4 right-4 bg-black/50 text-white p-2 rounded-full 
+            className="absolute top-4 right-4 bg-black/50 text-white p-2 rounded-full
                        hover:bg-white hover:text-black transition-all z-20"
           >
             BACK
@@ -73,12 +129,13 @@ const MainPage = () => {
       );
     }
 
-    // normal
+    // normal cafeteria view
     return (
-      <Cafeteria 
-        roomVariant={currentRoom} 
-        onAction={handleAction} 
-        onZoom={handleZoom} 
+      <Cafeteria
+        roomVariant={currentRoom}
+        onAction={handleAction}
+        onZoom={handleZoom}
+        onNavigate={navigateToScene}
       />
     );
   };
@@ -106,10 +163,12 @@ const MainPage = () => {
         )}
 
         {/* draw camera */}
-        {renderRoom()}
+        <div key={sceneKey} className="w-full h-full animate-scene-enter">
+          {renderRoom()}
+        </div>
 
         {/* navigation */}
-        {!activeZoom && (
+        {!activeZoom && currentScene === 'cafeteria' && (
           <>
             <button 
               onClick={() => navigate('prev')}
@@ -130,15 +189,33 @@ const MainPage = () => {
       </div>
 
       {/* Inventar */}
-      <div className="flex items-center p-3 gap-4 w-fit max-w-[90%] h-[12%] 
+      <div className="flex items-center p-3 gap-4 w-fit max-w-[90%] h-[12%]
                       bg-gray-900/50 border border-gray-800 rounded-2xl overflow-x-auto">
-        {Array.from({ length: 8 }, (_, i) => (
-          <div 
-            key={i} 
-            className="aspect-square h-full flex-shrink-0 bg-gray-800/80 rounded-xl 
-                       border border-gray-700 hover:border-blue-500 transition-all cursor-pointer"
-          />
-        ))}
+        {inventoryItems.map((item, i) => {
+          const isSelected = selectedSlot === i;
+          return (
+            <div
+              key={i}
+              onClick={() => handleSlotClick(i)}
+              className={`aspect-square h-full flex-shrink-0 rounded-xl border transition-all
+                ${item ? 'cursor-pointer' : 'cursor-default'}
+                ${isSelected
+                  ? 'border-yellow-400 shadow-[0_0_8px_rgba(250,204,21,0.7)] bg-gray-800/80'
+                  : item
+                    ? 'border-gray-500 hover:border-blue-400 bg-gray-800/80'
+                    : 'border-gray-700 bg-gray-800/80'
+                }`}
+            >
+              {item && (
+                <img
+                  src={item}
+                  alt="inventory item"
+                  className="w-full h-full object-contain p-1"
+                />
+              )}
+            </div>
+          );
+        })}
       </div>
     </main>
   );

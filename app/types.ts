@@ -6,6 +6,7 @@ export interface InteractiveElement {
   action?: string;
   zoomTarget?: string;
   zoomImage?: string; // pentru zoom custom
+  navigateTo?: string; // pentru navigare intre scene (ex: hallway)
 }
 
 export interface RoomConfig {
@@ -21,6 +22,7 @@ export interface CafeteriaProps {
   roomVariant: string;
   onAction: (text: string) => void;
   onZoom: (zoomId: string, zoomImage?: string) => void;
+  onNavigate?: (destination: string) => void; // pentru tranzitii intre scene
 }
 
 export interface DigitalKeypadProps {
