@@ -19,3 +19,7 @@ export const addToInventory = (item: string) => {
   const slot = inventory.indexOf(null);
   if (slot !== -1) inventory[slot] = item;
 };
+
+export const removeFromInventory = (slotIndex: number) => {
+  inventory[slotIndex] = null;
+};
