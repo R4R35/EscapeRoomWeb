@@ -43,8 +43,20 @@
     onPickup: (item: string) => void;
   }
 
+  export interface VisibleElements {
+    boxes_up: boolean;
+    box_right: boolean;
+    open_box: boolean;
+    pahare: boolean;
+    closet_key: boolean;
+  }
+
   export interface ClosetProps {
   onNavigate: (destination: Scene) => void;
   onAction: (text: string) => void;
   onPickup: (item: string) => void; 
+  itemsState: VisibleElements;
+  setItemsState: React.Dispatch<React.SetStateAction<VisibleElements>>;
 }
+
+

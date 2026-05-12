@@ -7,7 +7,7 @@ import Lab from './components/lab'
 import Closet from './components/closet'
 import Bottles from './components/bottles'
 import { inventory, addToInventory, markCookQuestDone } from './gameState'
-import { RoomConfigs, Scene } from './types'
+import { RoomConfigs, Scene, VisibleElements } from './types'
 
 const rooms = ['cafeteria_1', 'cafeteria_2'] as const;
 
@@ -20,7 +20,14 @@ const MainPage = () => {
   const [sceneKey, setSceneKey] = useState(0);
   const [inventoryItems, setInventoryItems] = useState<(string | null)[]>(() => [...inventory]);
   const [selectedSlot, setSelectedSlot] = useState<number | null>(null);
- const [unlockedDoors, setUnlockedDoors] = useState<string[]>([]);
+  const [unlockedDoors, setUnlockedDoors] = useState<string[]>([]);
+  const [visibleElements, setVisibleElements] = useState({
+    boxes_up: true,
+    box_right: true,
+    open_box: true,
+    pahare: true,
+    closet_key: true, 
+  });
 
   const currentRoom = rooms[cameraIndex];
 
@@ -143,6 +150,8 @@ const MainPage = () => {
           onNavigate={navigateToScene}
           onAction={handleAction}
           onPickup={handlePickup}
+          itemsState={visibleElements}
+          setItemsState={setVisibleElements}
         />
       );
     }
