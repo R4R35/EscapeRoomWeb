@@ -6,6 +6,8 @@ import Hallway from './components/hallway'
 import Lab from './components/lab'
 import Closet from './components/closet'
 import Bottles from './components/bottles'
+import BotanicGarden from './components/botanicGarden'
+import Win from './components/win'
 import { inventory, addToInventory, markCookQuestDone } from './gameState'
 import { RoomConfigs, Scene, VisibleElements } from './types'
 
@@ -41,7 +43,6 @@ const MainPage = () => {
   const handleAction = (text: string) => setGameMessage(text);
 
   const handlePickup = (item: string) => {
-
     const isAlreadyInInventory = inventoryItems.some(slot => slot === item);
 
     if (isAlreadyInInventory) {
@@ -69,11 +70,11 @@ const MainPage = () => {
   };
 
   const handleUseItem = (slotIndex: number) => {
-  const next = [...inventoryItems];
-  next[slotIndex] = null;
-  setInventoryItems(next);
-  inventory[slotIndex] = null; 
-  setSelectedSlot(null);
+    const next = [...inventoryItems];
+    next[slotIndex] = null;
+    setInventoryItems(next);
+    inventory[slotIndex] = null; 
+    setSelectedSlot(null);
   };
 
   const handleZoom = (zoomId: string, zoomImageUrl?: string) => {
@@ -99,6 +100,11 @@ const MainPage = () => {
 
   // zoom in/out
   const renderRoom = () => {
+    // win scene
+    if (currentScene === ('win' as Scene)) {
+      return <Win />;
+    }
+
     // hallway scene
     if (currentScene === 'hallway') {
       return (
@@ -112,23 +118,8 @@ const MainPage = () => {
           onUnlock={(doorId) => setUnlockedDoors(prev => [...prev, doorId])}
           unlockedDoors={unlockedDoors}
           inventoryItems={inventoryItems}
+          selectedSlot={selectedSlot}
         />
-      );
-    }
-
-    // greenhouse scene
-    if (currentScene === 'greenhouse') {
-      return (
-        <div className="relative w-full h-full flex items-center justify-center bg-[#1a2e1a]">
-          <p className="text-green-300 text-2xl font-bold tracking-widest">Greenhouse — Coming Soon</p>
-          <button
-            onClick={() => navigateToScene('hallway')}
-            className="absolute top-4 right-4 bg-black/50 text-white p-2 rounded-full
-                       hover:bg-white hover:text-black transition-all z-20"
-          >
-            BACK
-          </button>
-        </div>
       );
     }
 
@@ -143,7 +134,7 @@ const MainPage = () => {
       );
     }
 
-    //closet scene
+    // closet scene
     if (currentScene === 'closet') {
       return (
         <Closet
@@ -165,6 +156,19 @@ const MainPage = () => {
           onPickup={handlePickup}
           inventoryItems={inventoryItems}
           selectedSlot={selectedSlot}
+        />
+      );
+    }
+
+    // botanic garden scene
+    if (currentScene === 'botanicGarden') {
+      return (
+        <BotanicGarden
+          onNavigate={navigateToScene}
+          onAction={handleAction}
+          onZoom={handleZoom}
+          onPickup={handlePickup}
+          activeItem={selectedSlot !== null ? inventoryItems[selectedSlot] : null}
         />
       );
     }
@@ -222,20 +226,23 @@ const MainPage = () => {
   };
 
   const sceneTitles: Record<string, string> = {
-  cafeteria: "Cafeteria",
-  hallway: "Hallway",
-  lab: "Science Laboratory",
-  closet: "Storage Closet",
-  bottles: "Bottle Rack",
-  greenhouse: "Greenhouse",
+    cafeteria: "Cafeteria",
+    hallway: "Hallway",
+    lab: "Science Laboratory",
+    closet: "Storage Closet",
+    bottles: "Bottle Rack",
+    greenhouse: "Greenhouse",
+    botanicGarden: "Botanic Garden",
+    sector_b: "Sector B",
+    win: "Escape Successful!",
   };
 
   return (
     <main className="flex flex-col pt-[2%] pb-[1%] items-center justify-center gap-2 
-                    w-screen h-screen bg-black">
+                   w-screen h-screen bg-black">
       <div className='relative items-center'>
         <h1 className="text-white text-2xl font-bold tracking-widest">
-        {sceneTitles[currentScene]}
+        {sceneTitles[currentScene as string]}
       </h1>
       </div>
       
@@ -281,34 +288,36 @@ const MainPage = () => {
       </div>
 
       {/* Inventar */}
-      <div className="flex items-center p-3 gap-4 w-fit max-w-[90%] h-[12%]
-                      bg-gray-900/50 border border-gray-800 rounded-2xl overflow-x-auto">
-        {inventoryItems.map((item, i) => {
-          const isSelected = selectedSlot === i;
-          return (
-            <div
-              key={i}
-              onClick={() => handleSlotClick(i)}
-              className={`aspect-square h-full flex-shrink-0 rounded-xl border transition-all
-                ${item ? 'cursor-pointer' : 'cursor-default'}
-                ${isSelected
-                  ? 'border-yellow-400 shadow-[0_0_8px_rgba(250,204,21,0.7)] bg-gray-800/80'
-                  : item
-                    ? 'border-gray-500 hover:border-blue-400 bg-gray-800/80'
-                    : 'border-gray-700 bg-gray-800/80'
-                }`}
-            >
-              {item && (
-                <img
-                  src={item}
-                  alt="inventory item"
-                  className="w-full h-full object-contain p-1"
-                />
-              )}
-            </div>
-          );
-        })}
-      </div>
+      {currentScene !== 'win' && (
+        <div className="flex items-center p-3 gap-4 w-fit max-w-[90%] h-[12%]
+                        bg-gray-900/50 border border-gray-800 rounded-2xl overflow-x-auto">
+          {inventoryItems.map((item, i) => {
+            const isSelected = selectedSlot === i;
+            return (
+              <div
+                key={i}
+                onClick={() => handleSlotClick(i)}
+                className={`aspect-square h-full flex-shrink-0 rounded-xl border transition-all
+                  ${item ? 'cursor-pointer' : 'cursor-default'}
+                  ${isSelected
+                    ? 'border-yellow-400 shadow-[0_0_8px_rgba(250,204,21,0.7)] bg-gray-800/80'
+                    : item
+                      ? 'border-gray-500 hover:border-blue-400 bg-gray-800/80'
+                      : 'border-gray-700 bg-gray-800/80'
+                  }`}
+              >
+                {item && (
+                  <img
+                    src={item}
+                    alt="inventory item"
+                    className="w-full h-full object-contain p-1"
+                  />
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
     </main>
   );
 };
