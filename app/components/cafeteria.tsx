@@ -10,7 +10,7 @@ const ROOM_CONFIGS: RoomConfigs = {
       {
         id: 'cook',
         position: 'top-[38%] left-[10%] w-[40%] h-[40%]',
-        action: 'Shhh! Keep your voice down... They are watching. I cannot work on an empty stomach. Bring me a green bag of chips and a bottle of water and i will give you the key to the closet.',
+        action: 'I cannot work on an empty stomach. Bring me a green bag of chips and a bottle of water and i will give you the key to the closet.',
       },
       {
         id: 'closet_door',
