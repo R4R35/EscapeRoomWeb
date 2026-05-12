@@ -58,9 +58,6 @@ const DigitalKeypad: React.FC<DigitalKeypadProps> = ({ onBack, onAction, onPicku
           <span className="text-green-500 font-mono text-3xl tracking-[10px]">
             {code.padEnd(4, "_")}
           </span>
-          <div className="text-green-900 text-[10px] mt-1 uppercase font-bold">
-            Security System v4.9
-          </div>
         </div>
 
         <div className="grid grid-cols-3 gap-3 w-full">

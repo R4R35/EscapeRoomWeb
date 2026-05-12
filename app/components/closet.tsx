@@ -2,23 +2,17 @@
 import React, { useState } from 'react'
 import { ClosetProps} from '../types'
 
-const Closet: React.FC<ClosetProps> = ({ onNavigate, onAction, onPickup }) => {
-  const [visibleElements, setVisibleElements] = useState({
-    boxes_up: true,
-    box_right: true,
-    open_box: true,
-    pahare: true,
-    closet_key: true, 
-  });
+const Closet: React.FC<ClosetProps> = ({ onNavigate, onAction, onPickup, itemsState, setItemsState }) => {
+  
 
-  const handleRemove = (id: keyof typeof visibleElements, message: string) => {
-    setVisibleElements(prev => ({ ...prev, [id]: false }));
+  const handleRemove = (id: string, message: string) => {
+    setItemsState(prev => ({ ...prev, [id]: false }));
     onAction(message);
   };
 
   const handlePickKey = () => {
     onPickup('Cafeteria/hallway_key.png');
-    setVisibleElements(prev => ({ ...prev, closet_key: false }));
+    setItemsState(prev => ({ ...prev, closet_key: false }));
     onAction("You found a key!");
   };
 
@@ -30,7 +24,7 @@ const Closet: React.FC<ClosetProps> = ({ onNavigate, onAction, onPickup }) => {
         className="absolute inset-0 w-full h-full object-fill"
       />
 
-      {visibleElements.closet_key && (
+      {itemsState.closet_key && (
         <button
           onClick={handlePickKey}
           style={{ top: '65%', left: '27%', width: '7%', height: '7%' }}
@@ -40,7 +34,7 @@ const Closet: React.FC<ClosetProps> = ({ onNavigate, onAction, onPickup }) => {
         </button>
       )}
 
-      {visibleElements.boxes_up && (
+      {itemsState.boxes_up && (
         <button
           onClick={() => handleRemove('boxes_up', "Box removed")}
           style={{ top: '30%', left: '27%', width: '10%', height: '9%' }}
@@ -50,7 +44,7 @@ const Closet: React.FC<ClosetProps> = ({ onNavigate, onAction, onPickup }) => {
         </button>
       )}
 
-      {visibleElements.box_right && (
+      {itemsState.box_right && (
         <button
           onClick={() => handleRemove('box_right', "Box removed")}
           style={{ top: '64%', left: '64%', width: '10%', height: '10%' }}
@@ -60,7 +54,7 @@ const Closet: React.FC<ClosetProps> = ({ onNavigate, onAction, onPickup }) => {
         </button>
       )}
 
-      {visibleElements.open_box && (
+      {itemsState.open_box && (
         <button
           onClick={() => handleRemove('open_box', "Box removed")}
           style={{ top: '64%', left: '28%', width: '10%', height: '10%' }}
