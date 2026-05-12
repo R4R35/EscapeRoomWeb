@@ -21,7 +21,7 @@ const DigitalKeypad: React.FC<DigitalKeypadProps> = ({ onBack, onAction, onPicku
 
   const handleOk = () => {
   if (code === CORRECT_CODE_CLOSET) {
-    onAction("You got the key to the closet!");
+    onAction("You found a key!");
     onPickup("Cafeteria/closet_key.png"); 
   } else {
     onAction("Wrong code!");

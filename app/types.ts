@@ -1,4 +1,4 @@
-  export type Scene = 'cafeteria' | 'hallway' | 'lab' | 'closet';
+  export type Scene = 'cafeteria' | 'hallway' | 'lab' | 'closet' | 'bottles' | 'greenhouse';
   
   export interface InteractiveElement {
     id: string;
@@ -6,8 +6,9 @@
     image?: string;
     action?: string;
     zoomTarget?: string;
-    zoomImage?: string; 
+    zoomImage?: string;
     navigateTo?: Scene;
+    buttonStyle?: string;
   }
 
   export interface RoomConfig {

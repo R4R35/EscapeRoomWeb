@@ -5,7 +5,8 @@ import DigitalKeypad from './components/digitalKeypad'
 import Hallway from './components/hallway'
 import Lab from './components/lab'
 import Closet from './components/closet'
-import { inventory, addToInventory } from './gameState'
+import Bottles from './components/bottles'
+import { inventory, addToInventory, markCookQuestDone } from './gameState'
 import { RoomConfigs, Scene } from './types'
 
 const rooms = ['cafeteria_1', 'cafeteria_2'] as const;
@@ -97,7 +98,30 @@ const MainPage = () => {
         <Hallway
           onNavigate={navigateToScene}
           onAction={handleAction}
+          onConsumeItem={(item) => {
+            const slot = inventoryItems.indexOf(item);
+            if (slot !== -1) handleUseItem(slot);
+          }}
+          onUnlock={(doorId) => setUnlockedDoors(prev => [...prev, doorId])}
+          unlockedDoors={unlockedDoors}
+          inventoryItems={inventoryItems}
         />
+      );
+    }
+
+    // greenhouse scene
+    if (currentScene === 'greenhouse') {
+      return (
+        <div className="relative w-full h-full flex items-center justify-center bg-[#1a2e1a]">
+          <p className="text-green-300 text-2xl font-bold tracking-widest">Greenhouse — Coming Soon</p>
+          <button
+            onClick={() => navigateToScene('hallway')}
+            className="absolute top-4 right-4 bg-black/50 text-white p-2 rounded-full
+                       hover:bg-white hover:text-black transition-all z-20"
+          >
+            BACK
+          </button>
+        </div>
       );
     }
 
@@ -119,6 +143,19 @@ const MainPage = () => {
           onNavigate={navigateToScene}
           onAction={handleAction}
           onPickup={handlePickup}
+        />
+      );
+    }
+
+    // bottles scene
+    if (currentScene === 'bottles') {
+      return (
+        <Bottles
+          onNavigate={navigateToScene}
+          onAction={handleAction}
+          onPickup={handlePickup}
+          inventoryItems={inventoryItems}
+          selectedSlot={selectedSlot}
         />
       );
     }
@@ -162,6 +199,7 @@ const MainPage = () => {
         unlockedDoors={unlockedDoors}
         onUnlock={(doorId) => {
           setUnlockedDoors(prev => [...prev, doorId]);
+          if (doorId === 'closet_door') markCookQuestDone();
           if (selectedSlot !== null) handleUseItem(selectedSlot);
         }}
         roomVariant={currentRoom}
@@ -178,7 +216,9 @@ const MainPage = () => {
   cafeteria: "Cafeteria",
   hallway: "Hallway",
   lab: "Science Laboratory",
-  closet: "Storage Closet"
+  closet: "Storage Closet",
+  bottles: "Bottle Rack",
+  greenhouse: "Greenhouse",
   };
 
   return (

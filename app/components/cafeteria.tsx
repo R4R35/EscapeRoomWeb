@@ -1,6 +1,7 @@
 'use client'
 import React from 'react'
 import { RoomConfigs, CafeteriaProps, InteractiveElement } from '../types'
+import { cookQuestDone } from '../gameState'
 
 const ROOM_CONFIGS: RoomConfigs = {
   cafeteria_1: {
@@ -15,7 +16,7 @@ const ROOM_CONFIGS: RoomConfigs = {
         id: 'closet_door',
         position: 'top-[21%] left-[69%] w-[22%] h-[70%]',
         action: 'The door is locked! You need to find a key.',
-      }
+      },
     ]
   },
   cafeteria_2: {
@@ -88,6 +89,14 @@ const Cafeteria: React.FC<CafeteriaProps> = ({ roomVariant, onAction, onZoom, on
     return;
   }
 
+    if (element.id === 'cook') {
+      onAction(cookQuestDone
+        ? 'Blue chips, red chips, big bottle, orange chips, water ' // TODO: add post-quest cook dialogue
+        : element.action ?? ''
+      );
+      return;
+    }
+
     if (element.navigateTo && onNavigate) {
       onNavigate(element.navigateTo);
     } else if (element.zoomTarget) {
@@ -109,10 +118,10 @@ const Cafeteria: React.FC<CafeteriaProps> = ({ roomVariant, onAction, onZoom, on
         <button
           key={element.id}
           onClick={() => handleElementClick(element)}
-          className={`absolute bg-transparent ${element.position} cursor-pointer hover:brightness-110 transition-all`}
-        >
-
-        </button>
+          className={`absolute ${element.position} cursor-pointer transition-all ${
+            element.buttonStyle ?? 'bg-transparent hover:brightness-110'
+          }`}
+        />
       ))}
     </div>
   );

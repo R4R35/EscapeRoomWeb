@@ -19,7 +19,7 @@ const Closet: React.FC<ClosetProps> = ({ onNavigate, onAction, onPickup }) => {
   const handlePickKey = () => {
     onPickup('Cafeteria/hallway_key.png');
     setVisibleElements(prev => ({ ...prev, closet_key: false }));
-    onAction("Found the hallway key!");
+    onAction("You found a key!");
   };
 
   return (
@@ -69,6 +69,13 @@ const Closet: React.FC<ClosetProps> = ({ onNavigate, onAction, onPickup }) => {
           <img src="Closet/open_box.png" className="w-full h-full object-fill" alt="box right" />
         </button>
       )}
+
+      <button
+        onClick={() => onNavigate('bottles')}
+        style={{ top: '41%', left: '50%', transform: 'translateX(-50%)', width: '45%', height: '8%' }}
+        className="absolute rounded-full  
+                   transition-all z-50 cursor-pointer"
+      />
 
       <button
         onClick={() => onNavigate('cafeteria')}

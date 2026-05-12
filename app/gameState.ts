@@ -14,6 +14,9 @@ export const glassesState: Glass[] = [
 export let puzzleSolved = false;
 export const markPuzzleSolved = () => { puzzleSolved = true; };
 
+export let cookQuestDone = false;
+export const markCookQuestDone = () => { cookQuestDone = true; };
+
 export const inventory: (string | null)[] = Array(8).fill(null);
 export const addToInventory = (item: string) => {
   const slot = inventory.indexOf(null);
@@ -23,3 +26,8 @@ export const addToInventory = (item: string) => {
 export const removeFromInventory = (slotIndex: number) => {
   inventory[slotIndex] = null;
 };
+
+export const bottleCounters: number[] = Array(10).fill(0);
+
+export let bottlePuzzleSolved = false;
+export const markBottlePuzzleSolved = () => { bottlePuzzleSolved = true; };
