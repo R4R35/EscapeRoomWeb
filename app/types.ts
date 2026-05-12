@@ -1,5 +1,5 @@
-  export type Scene = 'cafeteria' | 'hallway' | 'lab' | 'closet' | 'bottles' | 'greenhouse';
-  
+export type Scene = 'cafeteria' | 'hallway' | 'lab' | 'closet' | 'bottles' | 'botanicGarden';
+
   export interface InteractiveElement {
     id: string;
     position: string;

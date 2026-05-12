@@ -4,7 +4,7 @@ import { bottleCounters, bottlePuzzleSolved, markBottlePuzzleSolved } from '../g
 import { Scene } from '../types'
 
 const SOLUTION = [1, 9, 0, 7, 1, 0, 1, 8, 0, 5]
-const KEY_ITEM = 'Cafeteria/hallway_key.png'
+const KEY_ITEM = 'Closet/greenhouse_key.png'
 
 interface BottlesProps {
   onNavigate: (destination: Scene) => void;
